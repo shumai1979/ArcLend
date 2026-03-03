@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>ArcLend — Lending Protocol · Arc Testnet</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  --bg:#04070f;--s0:#070c18;--s1:#0b1124;
+  --b0:#1a2540;--b1:#243260;
+  --arc:#3b82f6;--arc2:#60a5fa;--arc3:rgba(59,130,246,.12);
+  --g:#22c55e;--g2:rgba(34,197,94,.1);
+  --r:#f43f5e;--r2:rgba(244,63,94,.1);
+  --y:#eab308;
+  --t:#f0f4ff;--t2:#8899bb;--t3:#4a5a7a;
+  --pu:#8b5cf6;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+body{background:var(--bg);color:var(--t);font-family:'IBM Plex Sans',sans-serif;min-height:100vh;background-image:radial-gradient(ellipse 60% 40% at 20% 0%,rgba(59,130,246,.07) 0%,transparent 60%),radial-gradient(ellipse 40% 30% at 80% 100%,rgba(139,92,246,.05) 0%,transparent 60%);}
+
+/* TOPBAR */
+.bar{position:sticky;top:0;z-index:100;background:rgba(4,7,15,.92);backdrop-filter:blur(16px);border-bottom:1px solid var(--b0);height:58px;padding:0 24px;display:flex;align-items:center;justify-content:space-between;}
+.logo{display:flex;align-items:center;gap:9px;font-family:'Syne',sans-serif;font-size:1.25rem;font-weight:800;letter-spacing:-.03em;}
+.lm{width:26px;height:26px;border-radius:7px;background:linear-gradient(135deg,var(--arc),var(--pu));display:flex;align-items:center;justify-content:center;font-size:.6rem;font-weight:800;color:#fff;font-family:'IBM Plex Mono',monospace;}
+.ltag{font-family:'IBM Plex Mono',monospace;font-size:.57rem;background:var(--b0);border:1px solid var(--b1);color:var(--t3);padding:2px 7px;border-radius:4px;letter-spacing:.07em;}
+.nav{display:flex;gap:2px;}
+.nb{background:none;border:none;color:var(--t2);padding:6px 14px;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-size:.82rem;font-weight:500;transition:all .15s;}
+.nb:hover{background:var(--s0);color:var(--t);}
+.nb.on{background:var(--b0);color:var(--arc2);border:1px solid var(--b1);}
+.br{display:flex;align-items:center;gap:8px;}
+.npill{display:flex;align-items:center;gap:5px;background:var(--s1);border:1px solid var(--b0);border-radius:20px;padding:5px 11px;font-family:'IBM Plex Mono',monospace;font-size:.62rem;color:var(--t2);}
+.ndot{width:5px;height:5px;border-radius:50%;background:var(--g);animation:pulse 2s infinite;}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.2}}
+.wbtn{background:var(--arc);color:#fff;border:none;border-radius:8px;padding:7px 16px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.82rem;transition:all .15s;}
+.wbtn:hover{background:var(--arc2);}
+.wbtn.on{background:var(--s1);color:var(--t2);border:1px solid var(--b0);}
+
+/* BANNER */
+.banner{margin:14px 24px 0;border-radius:9px;padding:9px 15px;display:flex;align-items:center;gap:7px;font-family:'IBM Plex Mono',monospace;font-size:.68rem;background:var(--g2);border:1px solid rgba(34,197,94,.2);color:var(--g);cursor:pointer;transition:filter .15s;}
+.banner:hover{filter:brightness(1.1);}
+
+/* LAYOUT */
+.main{max-width:1120px;margin:0 auto;padding:22px;}
+.page{display:none;animation:fi .22s ease;}
+.page.on{display:block;}
+@keyframes fi{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+
+/* PAGE HEADER */
+.ph{margin-bottom:20px;}
+.ph h1{font-family:'Syne',sans-serif;font-size:1.55rem;font-weight:800;letter-spacing:-.03em;}
+.ph p{font-size:.79rem;color:var(--t2);margin-top:3px;}
+.kpis{display:flex;gap:12px;margin-top:14px;}
+.kpi{background:var(--s0);border:1px solid var(--b0);border-radius:9px;padding:12px 16px;min-width:130px;}
+.kl{font-family:'IBM Plex Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin-bottom:4px;}
+.kv{font-family:'IBM Plex Mono',monospace;font-size:1.2rem;font-weight:600;}
+.kv.g{color:var(--g);}
+.kv.b{color:var(--arc2);}
+.kv.y{color:var(--y);}
+
+/* MARKETS TABLE */
+.mtbl{background:var(--s0);border:1px solid var(--b0);border-radius:13px;overflow:hidden;margin-bottom:20px;}
+.mhd{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 172px;padding:10px 17px;background:var(--bg);border-bottom:1px solid var(--b0);font-family:'IBM Plex Mono',monospace;font-size:.59rem;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);}
+.mr{display:grid;grid-template-columns:2fr 1fr 1fr 1fr 1fr 1fr 172px;padding:13px 17px;border-bottom:1px solid var(--b0);align-items:center;transition:background .12s;}
+.mr:last-child{border:none;}
+.mr:hover{background:var(--s1);}
+.ac{display:flex;align-items:center;gap:9px;}
+.ai{width:32px;height:32px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:.55rem;font-weight:600;}
+.as{font-weight:600;font-size:.86rem;}
+.an{font-size:.67rem;color:var(--t2);margin-top:1px;}
+.vg{color:var(--g);font-family:'IBM Plex Mono',monospace;font-size:.83rem;}
+.vb{color:var(--arc2);font-family:'IBM Plex Mono',monospace;font-size:.83rem;}
+.vt{font-family:'IBM Plex Mono',monospace;font-size:.83rem;color:var(--t2);}
+.uw{display:flex;align-items:center;gap:5px;}
+.ubg{width:40px;height:3px;background:var(--b0);border-radius:2px;overflow:hidden;}
+.ufg{height:100%;border-radius:2px;background:var(--arc);}
+.abtns{display:flex;gap:6px;justify-content:flex-end;}
+.ab{padding:6px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.73rem;transition:all .15s;}
+.ab.s{background:var(--arc3);color:var(--arc2);border:1px solid rgba(59,130,246,.22);}
+.ab.s:hover{background:rgba(59,130,246,.2);}
+.ab.b{background:var(--g2);color:var(--g);border:1px solid rgba(34,197,94,.22);}
+.ab.b:hover{background:rgba(34,197,94,.18);}
+
+/* DASHBOARD */
+.sg{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:18px;}
+.sc{background:var(--s0);border:1px solid var(--b0);border-radius:9px;padding:13px;}
+.sl{font-family:'IBM Plex Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin-bottom:4px;}
+.sv{font-family:'IBM Plex Mono',monospace;font-size:1.15rem;font-weight:600;}
+.sv.g{color:var(--g);}
+.sv.r{color:var(--r);}
+.sv.b{color:var(--arc2);}
+
+/* HF */
+.hfc{background:var(--s0);border:1px solid var(--b0);border-radius:13px;padding:18px;margin-bottom:18px;}
+.hftop{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;}
+.hfl{font-family:'IBM Plex Mono',monospace;font-size:.58rem;text-transform:uppercase;letter-spacing:.09em;color:var(--t3);margin-bottom:3px;}
+.hfn{font-family:'IBM Plex Mono',monospace;font-size:2.6rem;font-weight:600;line-height:1;}
+.hfn.safe{color:var(--g);}
+.hfn.warn{color:var(--y);}
+.hfn.bad{color:var(--r);}
+.hfn.none{color:var(--t3);}
+.hfm{text-align:right;font-size:.73rem;color:var(--t2);line-height:1.9;}
+.hfm strong{color:var(--t);}
+.hfbg{height:6px;background:var(--b0);border-radius:3px;overflow:hidden;}
+.hffg{height:100%;border-radius:3px;transition:width .4s,background .4s;}
+.hfsc{display:flex;justify-content:space-between;font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-top:4px;}
+
+/* POSITIONS */
+.dg{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:20px;}
+.dc{background:var(--s0);border:1px solid var(--b0);border-radius:13px;overflow:hidden;}
+.dh{padding:12px 16px;border-bottom:1px solid var(--b0);display:flex;justify-content:space-between;align-items:center;}
+.dht{font-weight:600;font-size:.84rem;}
+.dhv{font-family:'IBM Plex Mono',monospace;font-size:.84rem;}
+.dhv.g{color:var(--g);}
+.dhv.r{color:var(--r);}
+.pr{display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--b0);}
+.pr:last-child{border:none;}
+.prl{display:flex;align-items:center;gap:8px;}
+.prs{font-weight:600;font-size:.83rem;}
+.prr{font-size:.67rem;margin-top:1px;}
+.prr.g{color:var(--g);}
+.prr.r{color:var(--r);}
+.pamt{font-family:'IBM Plex Mono',monospace;font-size:.83rem;font-weight:600;}
+.pusd{font-size:.67rem;color:var(--t3);}
+.pe{padding:20px 16px;text-align:center;font-size:.77rem;color:var(--t3);}
+
+/* FAUCET */
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:16px;}
+.fc{background:var(--s0);border:1px solid var(--b0);border-radius:13px;padding:17px;}
+.ft{font-family:'Syne',sans-serif;font-weight:700;font-size:.88rem;margin-bottom:5px;}
+.fd{font-size:.75rem;color:var(--t2);line-height:1.6;margin-bottom:12px;}
+.fb{width:100%;padding:9px;border:none;border-radius:7px;background:var(--arc);color:#fff;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.77rem;cursor:pointer;transition:all .15s;margin-bottom:4px;}
+.fb:hover{background:var(--arc2);}
+.fb.sec{background:var(--s1);color:var(--t2);border:1px solid var(--b0);}
+.fb.sec:hover{border-color:var(--arc);color:var(--t);}
+.fa{font-family:'IBM Plex Mono',monospace;font-size:.59rem;color:var(--t3);word-break:break-all;margin-top:6px;}
+.ag{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-top:11px;}
+
+/* MODAL */
+.ov{display:none;position:fixed;inset:0;z-index:200;background:rgba(2,4,10,.82);backdrop-filter:blur(12px);align-items:center;justify-content:center;}
+.ov.on{display:flex;}
+.modal{background:var(--s1);border:1px solid var(--b1);border-radius:15px;width:92%;max-width:416px;overflow:hidden;box-shadow:0 24px 80px rgba(0,0,0,.55);}
+.mh{padding:16px 20px;border-bottom:1px solid var(--b0);display:flex;justify-content:space-between;align-items:center;}
+.mt{font-family:'Syne',sans-serif;font-weight:700;font-size:.97rem;}
+.mx{background:none;border:none;color:var(--t3);font-size:1.1rem;cursor:pointer;}
+.mb{padding:17px 20px;}
+.ma{display:flex;align-items:center;gap:10px;background:var(--s0);border:1px solid var(--b0);border-radius:9px;padding:11px;margin-bottom:13px;}
+.man{font-weight:600;font-size:.88rem;}
+.mad{font-size:.67rem;color:var(--t2);margin-top:1px;}
+.mar{font-family:'IBM Plex Mono',monospace;font-size:1.25rem;font-weight:600;text-align:right;}
+.mar.g{color:var(--g);}
+.mar.r{color:var(--r);}
+.mrl{font-size:.6rem;color:var(--t3);text-align:right;margin-top:1px;}
+.ig{margin-bottom:12px;}
+.il{display:flex;justify-content:space-between;font-size:.69rem;color:var(--t2);margin-bottom:4px;}
+.iw{display:flex;background:var(--s0);border:1.5px solid var(--b0);border-radius:8px;overflow:hidden;transition:border-color .15s;}
+.iw:focus-within{border-color:var(--arc);}
+.inp{flex:1;background:none;border:none;outline:none;padding:10px 11px;font-family:'IBM Plex Mono',monospace;font-size:.92rem;color:var(--t);}
+.imax{padding:10px 11px;color:var(--arc2);font-weight:700;cursor:pointer;font-size:.68rem;}
+.iunit{padding:10px 11px;color:var(--t3);font-size:.68rem;font-weight:600;}
+.txi{background:var(--s0);border:1px solid var(--b0);border-radius:8px;padding:10px 12px;margin-bottom:12px;}
+.tir{display:flex;justify-content:space-between;font-size:.69rem;color:var(--t2);margin-bottom:3px;}
+.tir:last-child{margin:0;}
+.tv{font-family:'IBM Plex Mono',monospace;color:var(--t);font-weight:600;}
+.tv.g{color:var(--g);}
+.tv.r{color:var(--r);}
+.hwarn{background:rgba(244,63,94,.1);border:1px solid rgba(244,63,94,.22);border-radius:7px;padding:8px 11px;margin-bottom:11px;font-size:.7rem;color:var(--r);display:none;}
+
+/* Step buttons */
+.step-info{background:var(--s0);border:1px solid var(--b1);border-radius:8px;padding:9px 12px;margin-bottom:10px;font-size:.7rem;color:var(--t2);text-align:center;display:none;}
+.step-info.on{display:block;}
+.mbtns{display:grid;grid-template-columns:1fr 1fr;gap:7px;}
+.mbtns.s1{grid-template-columns:1fr;}
+.mbtn{padding:12px;border:none;border-radius:8px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:700;font-size:.82rem;transition:all .15s;}
+.mbtn.app{background:var(--arc);color:#fff;}
+.mbtn.app:hover{background:var(--arc2);transform:translateY(-1px);}
+.mbtn.app.done{background:var(--s0);color:var(--g);border:1.5px solid var(--g);cursor:default;}
+.mbtn.sup{background:var(--arc);color:#fff;}
+.mbtn.sup:hover:not(:disabled){background:var(--arc2);transform:translateY(-1px);}
+.mbtn.bor{background:var(--g);color:#000;}
+.mbtn.bor:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.mbtn.wit{background:var(--arc);color:#fff;}
+.mbtn.rep{background:var(--y);color:#000;}
+.mbtn:disabled{background:var(--b0) !important;color:var(--t3) !important;cursor:not-allowed !important;transform:none !important;border:none !important;}
+
+.txst{display:none;background:var(--s0);border:1px solid var(--b0);border-radius:8px;padding:11px;margin-top:10px;font-family:'IBM Plex Mono',monospace;font-size:.63rem;color:var(--t2);text-align:center;line-height:1.7;}
+.txst.on{display:block;}
+.txlnk{color:var(--arc2);cursor:pointer;}
+.txlnk:hover{text-decoration:underline;}
+
+/* TOAST */
+.toast{position:fixed;bottom:18px;right:18px;z-index:400;background:var(--s1);border:1px solid var(--b1);border-radius:9px;padding:11px 16px;font-size:.75rem;max-width:300px;display:none;font-family:'IBM Plex Mono',monospace;box-shadow:0 8px 32px rgba(0,0,0,.45);}
+.toast.on{display:block;animation:ts .22s ease;}
+@keyframes ts{from{transform:translateX(12px);opacity:0}to{transform:none;opacity:1}}
+.toast.ok{border-color:rgba(34,197,94,.3);color:var(--g);}
+.toast.err{border-color:rgba(244,63,94,.3);color:var(--r);}
+.toast.inf{border-color:rgba(59,130,246,.3);color:var(--arc2);}
+
+footer{text-align:center;padding:22px;border-top:1px solid var(--b0);font-family:'IBM Plex Mono',monospace;font-size:.59rem;color:var(--t3);line-height:1.9;}
+</style>
+</head>
+<body>
+
+<div class="bar">
+  <div class="logo">
+    <div class="lm">AL</div>
+    ArcLend
+    <span class="ltag">testnet</span>
+  </div>
+  <nav class="nav">
+    <button class="nb on" onclick="goPage('markets',this)">Markets</button>
+    <button class="nb"    onclick="goPage('dashboard',this)">Dashboard</button>
+    <button class="nb"    onclick="goPage('faucet',this)">Faucet</button>
+  </nav>
+  <div class="br">
+    <div class="npill"><div class="ndot"></div>Arc Testnet · 5042002</div>
+    <button class="wbtn" id="wbtn" onclick="connectWallet()">Connect Wallet</button>
+  </div>
+</div>
+
+<div class="banner" onclick="window.open('https://testnet.arcscan.app/address/0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2','_blank')">
+  ✓ ArcLend live · 0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2 · All transactions are real on-chain · View on explorer ↗
+</div>
+
+<div class="main">
+
+<!-- MARKETS -->
+<div class="page on" id="page-markets">
+  <div class="ph">
+    <h1>Lending Markets</h1>
+    <p>Arc Testnet · Circle infrastructure · USDC as gas · Real on-chain transactions</p>
+    <div class="kpis">
+      <div class="kpi"><div class="kl">Total Supplied</div><div class="kv g" id="kS">$0.00</div></div>
+      <div class="kpi"><div class="kl">Total Borrowed</div><div class="kv b" id="kB">$0.00</div></div>
+      <div class="kpi"><div class="kl">Utilization</div><div class="kv y" id="kU">0%</div></div>
+      <div class="kpi"><div class="kl">Protocol TXs</div><div class="kv" id="kTX">—</div></div>
+    </div>
+  </div>
+  <div class="mtbl">
+    <div class="mhd">
+      <span>Asset</span><span>Total Supply</span><span>Supply APY</span>
+      <span>Total Borrow</span><span>Borrow APR</span><span>Utilization</span><span></span>
+    </div>
+    <div id="mrows"></div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="page" id="page-dashboard">
+  <div class="ph">
+    <h1>Your Portfolio</h1>
+    <p>Live positions · Health factor · Real-time on-chain data</p>
+  </div>
+  <div class="sg">
+    <div class="sc"><div class="sl">Supplied</div><div class="sv g" id="dS">$0.00</div></div>
+    <div class="sc"><div class="sl">Borrowed</div><div class="sv r" id="dB">$0.00</div></div>
+    <div class="sc"><div class="sl">Net APY</div><div class="sv b" id="dA">0.00%</div></div>
+    <div class="sc"><div class="sl">Available to Borrow</div><div class="sv" id="dAv">$0.00</div></div>
+  </div>
+  <div class="hfc">
+    <div class="hftop">
+      <div>
+        <div class="hfl">Health Factor</div>
+        <div class="hfn none" id="hfn">—</div>
+      </div>
+      <div class="hfm">
+        Liquidation threshold: <strong>85%</strong><br>
+        Max LTV: <strong>80%</strong><br>
+        Liquidated when HF: <strong>&lt;1.00</strong>
+      </div>
+    </div>
+    <div class="hfbg"><div class="hffg" id="hff" style="width:0%;background:var(--g)"></div></div>
+    <div class="hfsc"><span>⚠ Danger &lt;1.0</span><span>Caution 1.0–1.5</span><span>Safe &gt;1.5 ✓</span></div>
+  </div>
+  <div class="dg">
+    <div class="dc">
+      <div class="dh"><span class="dht">💰 Supplied Assets</span><span class="dhv g" id="dST">$0.00</span></div>
+      <div id="supPos"><div class="pe">No supply positions.<br>Go to Markets → Supply.</div></div>
+    </div>
+    <div class="dc">
+      <div class="dh"><span class="dht">📤 Borrowed Assets</span><span class="dhv r" id="dBT">$0.00</span></div>
+      <div id="borPos"><div class="pe">No borrow positions.</div></div>
+    </div>
+  </div>
+</div>
+
+<!-- FAUCET -->
+<div class="page" id="page-faucet">
+  <div class="ph">
+    <h1>Faucet &amp; Setup</h1>
+    <p>Get testnet tokens and configure Arc Testnet in your wallet</p>
+  </div>
+  <div class="fg">
+    <div class="fc">
+      <div class="ft">💵 USDC — Gas + Collateral</div>
+      <div class="fd">USDC is Arc's native gas token. You need it to pay for all transactions and as lending collateral. Request up to 20 USDC every 2 hours.</div>
+      <button class="fb" onclick="open('https://faucet.circle.com','_blank')">Circle Faucet (Official) →</button>
+      <div class="fa">ERC-20: 0x3600000000000000000000000000000000000000 · 6 decimals</div>
+    </div>
+    <div class="fc">
+      <div class="ft">🇪🇺 EURC — Euro Stablecoin</div>
+      <div class="fd">Euro-denominated stablecoin by Circle. Select EURC on the Circle faucet after connecting your wallet.</div>
+      <button class="fb" onclick="open('https://faucet.circle.com','_blank')">Circle Faucet → select EURC</button>
+      <div class="fa">Contract: 0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a · 6 decimals</div>
+    </div>
+    <div class="fc">
+      <div class="ft">⚙ Add Arc Testnet to Wallet</div>
+      <div class="fd">Add Arc Testnet to MetaMask or Rabby automatically in one click.</div>
+      <button class="fb" onclick="addArcNet()">Add Arc Testnet Automatically</button>
+      <button class="fb sec" onclick="open('https://testnet.arcscan.app','_blank')">Arc Block Explorer →</button>
+      <div class="fa">Chain ID: 5042002 · RPC: arc-testnet.drpc.org · Gas: USDC</div>
+    </div>
+    <div class="fc">
+      <div class="ft">📋 ArcLend Contract</div>
+      <div class="fd">ArcLend is live on Arc Testnet. Supply USDC/EURC as collateral, then borrow up to 80% LTV.</div>
+      <button class="fb" onclick="open('https://testnet.arcscan.app/address/0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2','_blank')">View Contract on Explorer →</button>
+      <div class="fa">0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2</div>
+    </div>
+    <div class="fc" style="grid-column:1/-1">
+      <div class="ft">📋 Official Arc Testnet Addresses</div>
+      <div class="ag">
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">USDC (ERC-20 / Gas)</div><div class="fa" style="margin:0">0x3600000000000000000000000000000000000000</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">EURC</div><div class="fa" style="margin:0">0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">ArcLend Protocol</div><div class="fa" style="margin:0">0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">CCTP TokenMessenger</div><div class="fa" style="margin:0">0x8FE6B999Dc680CcFDD5Bf7EB0974218be2542DAA</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">Gateway Wallet</div><div class="fa" style="margin:0">0x0077777d7EBA4688BDeF3E311b846F25870A19B9</div></div>
+        <div><div style="font-family:'IBM Plex Mono',monospace;font-size:.58rem;color:var(--t3);margin-bottom:2px">CCTP MessageTransmitter</div><div class="fa" style="margin:0">0xE737e5cEBEEBa77EFE34D4aa090756590b1CE275</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+</div><!-- /main -->
+
+<!-- MODAL -->
+<div class="ov" id="ov">
+  <div class="modal">
+    <div class="mh">
+      <span class="mt" id="mtitle">Supply</span>
+      <button class="mx" onclick="closeModal()">✕</button>
+    </div>
+    <div class="mb">
+      <div class="ma">
+        <div class="ai" id="mico" style="width:34px;height:34px"></div>
+        <div style="flex:1">
+          <div class="man" id="mname">USDC</div>
+          <div class="mad" id="msub">USD Coin · Arc Testnet</div>
+        </div>
+        <div style="text-align:right">
+          <div class="mar g" id="mrate">5.20%</div>
+          <div class="mrl" id="mratel">APY</div>
+        </div>
+      </div>
+      <div class="ig">
+        <div class="il"><span>Amount</span><span id="mbal">Available: —</span></div>
+        <div class="iw">
+          <input class="inp" id="minp" type="number" placeholder="0.000000" step="0.000001" oninput="onChg()"/>
+          <span class="imax" onclick="setMax()">MAX</span>
+          <span class="iunit" id="munit">USDC</span>
+        </div>
+      </div>
+      <div class="txi">
+        <div class="tir"><span>Rate</span><span class="tv g" id="tirate">—</span></div>
+        <div class="tir"><span>Daily earnings</span><span class="tv g" id="tidaily">—</span></div>
+        <div class="tir"><span>Gas (paid in USDC)</span><span class="tv">~0.001 USDC</span></div>
+        <div class="tir" id="tihfr" style="display:none"><span>Health Factor after</span><span class="tv" id="tihf">—</span></div>
+        <div class="tir"><span>Transaction</span><span class="tv g">Real on-chain ✓</span></div>
+      </div>
+      <div class="hwarn" id="hwarn">⚠ Health Factor will drop below 1.2 — high liquidation risk!</div>
+
+      <!-- Two-step flow for Supply/Repay -->
+      <div class="step-info" id="stepInfo">Step 1: Approve token spending, then Step 2: Execute transaction.</div>
+
+      <div class="mbtns" id="mbtns">
+        <button class="mbtn app" id="mappbtn" onclick="doApprove()">1. Approve</button>
+        <button class="mbtn sup" id="mactbtn" onclick="doAction()" disabled>2. Supply</button>
+      </div>
+      <div class="txst" id="txst"></div>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<footer>
+  ArcLend v1.0 · Arc Testnet · Chain ID 5042002 · Contract: 0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2<br>
+  USDC: 0x3600000000000000000000000000000000000000 · EURC: 0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a<br>
+  ⚠ Testnet only — no real funds
+</footer>
+
+<script>
+// ═══════════════════════════════════════════════════
+//  CONTRACT LIVE ON ARC TESTNET
+// ═══════════════════════════════════════════════════
+const CONTRACT = "0x3A2Aa26B62cD5d5E71f1466B4c3b847532d2b3F2";
+const CHAIN_ID  = 5042002;
+const EXPLORER  = "https://testnet.arcscan.app";
+const USDC_ADDR = "0x3600000000000000000000000000000000000000";
+const EURC_ADDR = "0x89B50855Aa3bE2F677cD6303Cec089B5F319D72a";
+
+// ── VERIFIED SELECTORS (keccak256 computed from ABI) ──
+// supply(address,uint256)      = 0xf2b9fdb8  ✓
+// withdraw(address,uint256)    = 0xf3fef3a3  ✓
+// borrow(address,uint256)      = 0x4b8a3529  ✓
+// repay(address,uint256)       = 0x22867d78  ✓
+// getStats()                   = 0xc59d4847  ✓
+// getPosition(address)         = 0x16c19739  ✓
+// getLiquidity()               = 0x0910a510  ✓
+// balanceOf(address)           = 0x70a08231  ✓ (ERC-20 standard)
+// approve(address,uint256)     = 0x095ea7b3  ✓ (ERC-20 standard)
+const SEL = {
+  supply:      "0xf2b9fdb8",
+  withdraw:    "0xf3fef3a3",
+  borrow:      "0x4b8a3529",
+  repay:       "0x22867d78",
+  getStats:    "0xc59d4847",
+  getPosition: "0x16c19739",
+  getLiquidity:"0x0910a510",
+  balanceOf:   "0x70a08231",
+  approve:     "0x095ea7b3",
+};
+
+const MKT = [
+  { sym:"USDC", name:"USD Coin",  addr:USDC_ADDR, apy:5.20, apr:8.90, ltv:80, color:"#3b82f6", bg:"rgba(59,130,246,.12)",  dec:6, ts:0, tb:0 },
+  { sym:"EURC", name:"Euro Coin", addr:EURC_ADDR, apy:4.80, apr:8.20, ltv:75, color:"#8b5cf6", bg:"rgba(139,92,246,.12)", dec:6, ts:0, tb:0 },
+];
+
+let wallet=null, connected=false;
+let bals={USDC:0,EURC:0};
+let pos={sU:0,sE:0,bU:0,bE:0};
+let mode="supply", sym="USDC";
+let approvedAmt=0; // track if approve was done this session
+
+// ── WALLET ──────────────────────────────────────────
+async function connectWallet(){
+  if(!window.ethereum){toast("MetaMask / Rabby not detected!","err");return;}
+  if(connected)return;
+  try{
+    toast("Connecting...","inf");
+    const accs=await window.ethereum.request({method:"eth_requestAccounts"});
+    wallet=accs[0];
+    const cid=parseInt(await window.ethereum.request({method:"eth_chainId"}),16);
+    if(cid!==CHAIN_ID)await addArcNet();
+    connected=true;
+    const b=document.getElementById("wbtn");
+    b.textContent=wallet.slice(0,6)+"..."+wallet.slice(-4);
+    b.classList.add("on");
+    await loadAll();
+    renderAll();
+    toast("✓ Connected: "+wallet.slice(0,6)+"..."+wallet.slice(-4),"ok");
+  }catch(e){toast("Error: "+e.message,"err");}
+}
+
+async function addArcNet(){
+  try{
+    await window.ethereum.request({method:"wallet_switchEthereumChain",params:[{chainId:"0x"+CHAIN_ID.toString(16)}]});
+  }catch(e){
+    if(e.code===4902)await window.ethereum.request({method:"wallet_addEthereumChain",params:[{
+      chainId:"0x"+CHAIN_ID.toString(16),chainName:"Arc Testnet",
+      nativeCurrency:{name:"USD Coin",symbol:"USDC",decimals:6},
+      rpcUrls:["https://arc-testnet.drpc.org","https://rpc.testnet.arc.network"],
+      blockExplorerUrls:[EXPLORER]
+    }]});
+  }
+}
+
+async function loadAll(){ await Promise.all([loadBals(),loadContract()]); }
+
+async function loadBals(){
+  if(!wallet)return;
+  for(const s of["USDC","EURC"]){
+    try{
+      const addr=s==="USDC"?USDC_ADDR:EURC_ADDR;
+      const d=SEL.balanceOf+wallet.replace("0x","").padStart(64,"0");
+      const r=await window.ethereum.request({method:"eth_call",params:[{to:addr,data:d},"latest"]});
+      bals[s]=parseInt(r||"0x0",16)/1e6;
+    }catch{bals[s]=0;}
+  }
+}
+
+async function loadContract(){
+  if(!wallet)return;
+  // getPosition(address) — returns (sUsdc, sEurc, bUsdc, bEurc, maxBorrow, lastUpdate, hasPosition)
+  try{
+    const d=SEL.getPosition+wallet.replace("0x","").padStart(64,"0");
+    const r=await window.ethereum.request({method:"eth_call",params:[{to:CONTRACT,data:d},"latest"]});
+    if(r&&r.length>10){
+      const c=[];
+      for(let i=2;i<r.length;i+=64)c.push(r.slice(i,i+64));
+      if(c.length>=4){
+        pos.sU=parseInt(c[0],16)/1e6;
+        pos.sE=parseInt(c[1],16)/1e6;
+        pos.bU=parseInt(c[2],16)/1e6;
+        pos.bE=parseInt(c[3],16)/1e6;
+      }
+    }
+  }catch(e){console.warn("getPosition:",e.message);}
+
+  // getStats() — returns (totalSupplied, totalBorrowed, totalDepositors, utilization, netApy, version)
+  try{
+    const r=await window.ethereum.request({method:"eth_call",params:[{to:CONTRACT,data:SEL.getStats},"latest"]});
+    if(r&&r.length>10){
+      const c=[];
+      for(let i=2;i<r.length;i+=64)c.push(r.slice(i,i+64));
+      if(c.length>=3){
+        MKT[0].ts=parseInt(c[0],16)/1e6;
+        MKT[0].tb=parseInt(c[1],16)/1e6;
+        document.getElementById("kTX").textContent=parseInt(c[2],16);
+      }
+    }
+  }catch(e){console.warn("getStats:",e.message);}
+}
+
+// ── MODAL ─────────────────────────────────────────────
+function openModal(m,s){
+  if(!connected){toast("Connect wallet first!","err");return;}
+  mode=m;sym=s;
+  approvedAmt=0; // reset approve state on new modal
+
+  const mk=MKT.find(x=>x.sym===s);
+  document.getElementById("mtitle").textContent=
+    m==="supply"?"Supply":m==="withdraw"?"Withdraw":m==="borrow"?"Borrow":"Repay";
+
+  const ic=document.getElementById("mico");
+  Object.assign(ic.style,{background:mk.bg,color:mk.color,borderRadius:"50%",
+    display:"flex",alignItems:"center",justifyContent:"center",
+    fontFamily:"'IBM Plex Mono',monospace",fontSize:".55rem",fontWeight:"600"});
+  ic.textContent=s;
+
+  document.getElementById("mname").textContent=s;
+  document.getElementById("msub").textContent=mk.name+" · Arc Testnet";
+  document.getElementById("munit").textContent=s;
+  document.getElementById("minp").value="";
+
+  const earn=m==="supply"||m==="repay";
+  const rate=earn?mk.apy:mk.apr;
+  const rel=document.getElementById("mrate");
+  rel.textContent=rate.toFixed(2)+"%";
+  rel.className="mar "+(earn?"g":"r");
+  document.getElementById("mratel").textContent=earn?"APY":"APR";
+
+  // Available amount
+  let av=0;
+  if(m==="supply"||m==="repay") av=bals[s]||0;
+  else if(m==="withdraw") av=s==="USDC"?pos.sU:pos.sE;
+  else { // borrow
+    const col=pos.sU+pos.sE, debt=pos.bU+pos.bE;
+    av=Math.max(0,col*0.80-debt);
+  }
+  document.getElementById("mbal").textContent="Available: "+av.toFixed(4)+" "+s;
+  document.getElementById("minp").max=av;
+
+  // Configure buttons
+  const btns=document.getElementById("mbtns");
+  const ap=document.getElementById("mappbtn");
+  const ac=document.getElementById("mactbtn");
+  const si=document.getElementById("stepInfo");
+
+  if(m==="supply"||m==="repay"){
+    // Two-step: Approve then action
+    btns.className="mbtns";
+    ap.style.display="block";
+    ap.textContent="1. Approve "+s;
+    ap.className="mbtn app";
+    ap.disabled=false;
+    ac.textContent=m==="supply"?"2. Supply":"2. Repay";
+    ac.className=m==="supply"?"mbtn sup":"mbtn rep";
+    ac.disabled=true; // LOCKED until approve done
+    si.className="step-info on";
+    si.textContent="Step 1: Approve → Step 2: "+cap(m)+". You must approve first.";
+  }else if(m==="borrow"){
+    btns.className="mbtns s1";
+    ap.style.display="none";
+    ac.textContent="Borrow "+s;
+    ac.className="mbtn bor";
+    ac.disabled=false;
+    si.className="step-info";
+  }else{ // withdraw
+    btns.className="mbtns s1";
+    ap.style.display="none";
+    ac.textContent="Withdraw "+s;
+    ac.className="mbtn wit";
+    ac.disabled=false;
+    si.className="step-info";
+  }
+
+  document.getElementById("txst").className="txst";
+  document.getElementById("hwarn").style.display="none";
+  document.getElementById("tihfr").style.display=(m==="borrow"||m==="withdraw")?"flex":"none";
+  onChg();
+  document.getElementById("ov").classList.add("on");
+  setTimeout(()=>document.getElementById("minp").focus(),60);
+}
+
+function closeModal(){
+  document.getElementById("ov").classList.remove("on");
+  approvedAmt=0;
+}
+
+function setMax(){
+  const v=parseFloat(document.getElementById("minp").max)||0;
+  document.getElementById("minp").value=v.toFixed(6);
+  onChg();
+}
+
+function onChg(){
+  const amt=parseFloat(document.getElementById("minp").value)||0;
+  const mk=MKT.find(x=>x.sym===sym);
+  const earn=mode==="supply"||mode==="repay";
+  const rate=earn?mk.apy:mk.apr;
+  document.getElementById("tirate").textContent=rate.toFixed(2)+"%";
+  document.getElementById("tidaily").textContent=
+    amt>0?((earn?"+":"-")+(amt*rate/100/365).toFixed(6)+" "+sym+"/day"):"—";
+
+  if(mode==="borrow"||mode==="withdraw"){
+    const col=pos.sU+pos.sE, debt=pos.bU+pos.bE;
+    const hf=mode==="borrow"
+      ?(debt+amt>0?(col*0.85)/(debt+amt):Infinity)
+      :((col-amt)>0&&debt>0?((col-amt)*0.85)/debt:Infinity);
+    const el=document.getElementById("tihf");
+    el.textContent=isFinite(hf)?hf.toFixed(2):"∞";
+    el.className="tv "+(isFinite(hf)&&hf<1.2?"r":isFinite(hf)&&hf<1.5?"":"g");
+    document.getElementById("hwarn").style.display=(isFinite(hf)&&hf<1.2)?"block":"none";
+  }
+
+  // If amount changed after approve, re-lock the action button
+  if((mode==="supply"||mode==="repay") && approvedAmt>0 && amt>approvedAmt){
+    document.getElementById("mactbtn").disabled=true;
+    document.getElementById("stepInfo").textContent=
+      "Amount increased — please approve again.";
+    const ap=document.getElementById("mappbtn");
+    ap.className="mbtn app";
+    ap.disabled=false;
+    approvedAmt=0;
+  }
+}
+
+// ── STEP 1: APPROVE ───────────────────────────────────
+async function doApprove(){
+  const amt=parseFloat(document.getElementById("minp").value);
+  if(!amt||amt<=0){toast("Enter amount first","err");return;}
+
+  const amtWei=BigInt(Math.round(amt*1e6));
+  const tokenAddr=sym==="USDC"?USDC_ADDR:EURC_ADDR;
+  const data=SEL.approve
+    +CONTRACT.replace("0x","").padStart(64,"0")
+    +amtWei.toString(16).padStart(64,"0");
+
+  const ap=document.getElementById("mappbtn");
+  const ac=document.getElementById("mactbtn");
+  ap.disabled=true;
+  showTx("⏳ Waiting for approval in MetaMask...");
+
+  try{
+    const hash=await window.ethereum.request({
+      method:"eth_sendTransaction",
+      params:[{from:wallet,to:tokenAddr,data,gas:"0x30D40"}]
+    });
+    showTx("✅ Approved! Waiting for confirmation...\n"+hash);
+
+    // Wait for receipt
+    let receipt=null;
+    for(let i=0;i<30;i++){
+      await sleep(2000);
+      try{
+        receipt=await window.ethereum.request({
+          method:"eth_getTransactionReceipt",params:[hash]
+        });
+        if(receipt)break;
+      }catch{}
+    }
+
+    if(receipt && receipt.status==="0x1"){
+      approvedAmt=amt;
+      ap.textContent="✓ Approved";
+      ap.className="mbtn app done";
+      ap.disabled=true;
+      ac.disabled=false; // UNLOCK the action button
+      document.getElementById("stepInfo").textContent=
+        "✓ Approved! Now click Step 2 to "+mode+".";
+      showTx("✅ Approval confirmed!\n"+hash);
+      toast("✓ "+amt.toFixed(4)+" "+sym+" approved! Now click Step 2.","ok");
+    }else if(receipt){
+      toast("Approval failed on-chain","err");
+      ap.disabled=false;
+      clearTx();
+    }else{
+      // Timeout but hash exists — optimistic unlock
+      approvedAmt=amt;
+      ap.textContent="✓ Approved (pending)";
+      ap.className="mbtn app done";
+      ap.disabled=true;
+      ac.disabled=false;
+      document.getElementById("stepInfo").textContent=
+        "Approval pending. Click Step 2 to continue.";
+      toast("Approve submitted — proceed with Step 2","inf");
+    }
+  }catch(e){
+    if(e.code===4001)toast("Cancelled","err");
+    else toast("Error: "+e.message,"err");
+    ap.disabled=false;
+    clearTx();
+  }
+}
+
+// ── STEP 2: ACTION ────────────────────────────────────
+async function doAction(){
+  const amt=parseFloat(document.getElementById("minp").value);
+  if(!amt||amt<=0){toast("Enter amount first","err");return;}
+
+  // Guard: for supply/repay, must have approved
+  if((mode==="supply"||mode==="repay")&&approvedAmt<=0){
+    toast("Please approve first (Step 1)","err");
+    return;
+  }
+
+  const amtWei=BigInt(Math.round(amt*1e6));
+  const tokenAddr=sym==="USDC"?USDC_ADDR:EURC_ADDR;
+  const tPad=tokenAddr.replace("0x","").padStart(64,"0");
+  const aPad=amtWei.toString(16).padStart(64,"0");
+  const selMap={supply:SEL.supply,withdraw:SEL.withdraw,borrow:SEL.borrow,repay:SEL.repay};
+  const data=selMap[mode]+tPad+aPad;
+
+  const ac=document.getElementById("mactbtn");
+  ac.disabled=true;
+  showTx("⏳ Waiting for "+mode+" transaction in MetaMask...");
+
+  try{
+    const hash=await window.ethereum.request({
+      method:"eth_sendTransaction",
+      params:[{from:wallet,to:CONTRACT,data,gas:"0x493E0"}]
+    });
+    showTx("✅ "+cap(mode)+" submitted!\n"+hash);
+    toast("✓ "+cap(mode)+" "+amt.toFixed(4)+" "+sym+" submitted — on-chain!","ok");
+
+    // Optimistic update
+    applyLocal(mode,sym,amt);
+    renderAll();
+
+    // Wait for confirmation then reload
+    await sleep(4000);
+    await loadAll();
+    renderAll();
+    closeModal();
+  }catch(e){
+    if(e.code===4001)toast("Cancelled","err");
+    else toast("Error: "+e.message,"err");
+    ac.disabled=false;
+    clearTx();
+  }
+}
+
+function applyLocal(m,s,amt){
+  const mk=MKT.find(x=>x.sym===s);
+  if(m==="supply"){
+    if(s==="USDC")pos.sU+=amt;else pos.sE+=amt;
+    bals[s]=Math.max(0,bals[s]-amt);mk.ts+=amt;
+  }else if(m==="withdraw"){
+    if(s==="USDC")pos.sU=Math.max(0,pos.sU-amt);else pos.sE=Math.max(0,pos.sE-amt);
+    bals[s]+=amt;mk.ts=Math.max(0,mk.ts-amt);
+  }else if(m==="borrow"){
+    if(s==="USDC")pos.bU+=amt;else pos.bE+=amt;
+    bals[s]+=amt;mk.tb+=amt;
+  }else if(m==="repay"){
+    if(s==="USDC")pos.bU=Math.max(0,pos.bU-amt);else pos.bE=Math.max(0,pos.bE-amt);
+    bals[s]=Math.max(0,bals[s]-amt);mk.tb=Math.max(0,mk.tb-amt);
+  }
+}
+
+// ── RENDER ────────────────────────────────────────────
+function renderAll(){renderMarkets();renderDashboard();}
+
+function renderMarkets(){
+  const tS=MKT.reduce((a,m)=>a+m.ts,0),tB=MKT.reduce((a,m)=>a+m.tb,0);
+  const ut=tS>0?tB/tS*100:0;
+  document.getElementById("kS").textContent="$"+tS.toFixed(2);
+  document.getElementById("kB").textContent="$"+tB.toFixed(2);
+  document.getElementById("kU").textContent=ut.toFixed(1)+"%";
+  document.getElementById("mrows").innerHTML=MKT.map(mk=>{
+    const u=mk.ts>0?mk.tb/mk.ts*100:0;
+    return`<div class="mr">
+      <div class="ac">
+        <div class="ai" style="background:${mk.bg};color:${mk.color}">${mk.sym}</div>
+        <div><div class="as">${mk.sym}</div><div class="an">${mk.name}</div></div>
+      </div>
+      <div class="vt">$${mk.ts.toFixed(2)}</div>
+      <div class="vg">${mk.apy.toFixed(2)}%</div>
+      <div class="vt">$${mk.tb.toFixed(2)}</div>
+      <div class="vb">${mk.apr.toFixed(2)}%</div>
+      <div class="uw">
+        <div class="ubg"><div class="ufg" style="width:${Math.min(u,100)}%"></div></div>
+        <span style="font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--t2)">${u.toFixed(0)}%</span>
+      </div>
+      <div class="abtns">
+        <button class="ab s" onclick="openModal('supply','${mk.sym}')">Supply</button>
+        <button class="ab b" onclick="openModal('borrow','${mk.sym}')">Borrow</button>
+      </div>
+    </div>`;
+  }).join("");
+}
+
+function renderDashboard(){
+  const sU=pos.sU+pos.sE, bU=pos.bU+pos.bE;
+  const net=sU>0?((pos.sU*5.20+pos.sE*4.80)/sU-(bU>0?(pos.bU*8.90+pos.bE*8.20)/bU:0)):0;
+  const av=Math.max(0,sU*0.80-bU);
+  document.getElementById("dS").textContent="$"+sU.toFixed(4);
+  document.getElementById("dB").textContent="$"+bU.toFixed(4);
+  document.getElementById("dA").textContent=net.toFixed(2)+"%";
+  document.getElementById("dAv").textContent="$"+av.toFixed(4);
+  document.getElementById("dST").textContent="$"+sU.toFixed(4);
+  document.getElementById("dBT").textContent="$"+bU.toFixed(4);
+
+  const hf=bU>0?(sU*0.85)/bU:Infinity;
+  const el=document.getElementById("hfn");
+  if(!isFinite(hf)){
+    el.textContent="—";el.className="hfn none";
+    document.getElementById("hff").style.width="0%";
+  }else{
+    el.textContent=hf.toFixed(2);
+    el.className="hfn "+(hf<1?"bad":hf<1.5?"warn":"safe");
+    const bar=document.getElementById("hff");
+    bar.style.width=Math.min(hf/3*100,100)+"%";
+    bar.style.background=hf<1?"var(--r)":hf<1.5?"var(--y)":"var(--g)";
+  }
+
+  const sd=document.getElementById("supPos"),sr=[];
+  if(pos.sU>0)sr.push(prow("USDC",pos.sU,"5.20% APY",true));
+  if(pos.sE>0)sr.push(prow("EURC",pos.sE,"4.80% APY",true));
+  sd.innerHTML=sr.length?sr.join(""):`<div class="pe">No supply positions.<br>Go to Markets → Supply.</div>`;
+
+  const bd=document.getElementById("borPos"),br=[];
+  if(pos.bU>0)br.push(prow("USDC",pos.bU,"8.90% APR",false));
+  if(pos.bE>0)br.push(prow("EURC",pos.bE,"8.20% APR",false));
+  bd.innerHTML=br.length?br.join(""):`<div class="pe">No borrow positions.</div>`;
+}
+
+function prow(s,amt,rate,isS){
+  const mk=MKT.find(x=>x.sym===s);
+  const act=isS?"withdraw":"repay";
+  return`<div class="pr">
+    <div class="prl">
+      <div class="ai" style="background:${mk.bg};color:${mk.color};width:30px;height:30px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'IBM Plex Mono',monospace;font-size:.53rem;font-weight:600;flex-shrink:0">${s}</div>
+      <div><div class="prs">${s}</div><div class="prr ${isS?"g":"r"}">${rate}</div></div>
+    </div>
+    <div style="display:flex;align-items:center;gap:8px">
+      <div><div class="pamt">${amt.toFixed(4)} ${s}</div><div class="pusd">$${amt.toFixed(4)}</div></div>
+      <button class="ab ${isS?"s":"b"}" style="padding:5px 11px;font-size:.7rem" onclick="openModal('${act}','${s}')">${isS?"Withdraw":"Repay"}</button>
+    </div>
+  </div>`;
+}
+
+function showTx(msg){
+  const el=document.getElementById("txst");
+  el.className="txst on";
+  el.innerHTML=msg.split("\n").map((l,i)=>{
+    if(i>0&&l.startsWith("0x"))
+      return`<div><a class="txlnk" href="${EXPLORER}/tx/${l}" target="_blank">${l.slice(0,14)}...${l.slice(-6)} ↗</a></div>`;
+    return`<div>${l}</div>`;
+  }).join("");
+}
+function clearTx(){document.getElementById("txst").className="txst";}
+
+function goPage(id,el){
+  document.querySelectorAll(".page").forEach(p=>p.classList.remove("on"));
+  document.querySelectorAll(".nb").forEach(b=>b.classList.remove("on"));
+  document.getElementById("page-"+id).classList.add("on");
+  el.classList.add("on");
+}
+function cap(s){return s.charAt(0).toUpperCase()+s.slice(1);}
+const sleep=ms=>new Promise(r=>setTimeout(r,ms));
+function toast(msg,t){
+  const el=document.getElementById("toast");
+  el.textContent=msg;el.className="toast on "+t;
+  clearTimeout(el._t);el._t=setTimeout(()=>el.classList.remove("on"),6000);
+}
+
+// ── INIT ──────────────────────────────────────────────
+document.getElementById("ov").addEventListener("click",e=>{
+  if(e.target===document.getElementById("ov"))closeModal();
+});
+if(window.ethereum){
+  window.ethereum.on("accountsChanged",a=>{
+    if(!a.length){
+      connected=false;wallet=null;
+      const b=document.getElementById("wbtn");
+      b.textContent="Connect Wallet";b.classList.remove("on");
+    }else{
+      wallet=a[0];loadAll().then(renderAll);
+    }
+  });
+  window.ethereum.on("chainChanged",()=>location.reload());
+}
+renderAll();
+</script>
+</body>
+</html>
