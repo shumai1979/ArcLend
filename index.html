@@ -74,7 +74,7 @@ body{background:var(--bg);color:var(--t);font-family:'IBM Plex Sans',sans-serif;
 .uw{display:flex;align-items:center;gap:5px;}
 .ubg{width:40px;height:3px;background:var(--b0);border-radius:2px;overflow:hidden;}
 .ufg{height:100%;border-radius:2px;background:var(--arc);}
-.abtns{display:flex;gap:6px;justify-content:flex-end;}
+.mr-top{display:flex;align-items:center;justify-content:space-between;width:100%;gap:12px;}.mr-stats{display:flex;gap:14px;align-items:center;flex-shrink:0;}.abtns{display:flex;gap:6px;justify-content:flex-end;}
 .ab{padding:6px 13px;border:none;border-radius:6px;cursor:pointer;font-family:'IBM Plex Sans',sans-serif;font-weight:600;font-size:.73rem;transition:all .15s;}
 .ab.s{background:var(--arc3);color:var(--arc2);border:1px solid rgba(59,130,246,.22);}
 .ab.s:hover{background:rgba(59,130,246,.2);}
@@ -197,6 +197,48 @@ body{background:var(--bg);color:var(--t);font-family:'IBM Plex Sans',sans-serif;
 .toast.inf{border-color:rgba(59,130,246,.3);color:var(--arc2);}
 
 footer{text-align:center;padding:22px;border-top:1px solid var(--b0);font-family:'IBM Plex Mono',monospace;font-size:.59rem;color:var(--t3);line-height:1.9;}
+
+/* ── MOBILE ── */
+@media(max-width:640px){
+  .bar{padding:0 14px;}
+  .ltag{display:none;}
+  .nav .nb{padding:5px 9px;font-size:.75rem;}
+  .npill{display:none;}
+  .main{padding:12px;}
+
+  /* Markets: hide desktop header, card layout per row */
+  .mhd{display:none;}
+  .mr{
+    display:flex;flex-direction:column;
+    padding:14px 12px;gap:10px;
+  }
+  .mr-top{flex-direction:column;align-items:flex-start;gap:6px;}
+  .mr-stats{flex-wrap:wrap;gap:10px;}
+  .abtns{
+    width:100%;display:grid;grid-template-columns:1fr 1fr;gap:8px;
+  }
+  .abtns .ab{
+    padding:11px 8px;font-size:.8rem;text-align:center;justify-content:center;
+  }
+
+  /* KPIs: 2 columns */
+  .kpis{flex-wrap:wrap;}
+  .kpi{min-width:calc(50% - 6px);flex:1;}
+
+  /* Dashboard: single column */
+  .sg{grid-template-columns:1fr 1fr;}
+  .dg{grid-template-columns:1fr;}
+
+  /* Faucet: single column */
+  .fg{grid-template-columns:1fr;}
+  .ag{grid-template-columns:1fr 1fr;}
+
+  /* Modal: full width */
+  .modal{width:98%;border-radius:12px;}
+  .mbtns{grid-template-columns:1fr;}
+  .mbtns .mbtn{padding:13px;}
+  .mb{padding:14px;}
+}
 </style>
 </head>
 <body>
@@ -779,17 +821,16 @@ function renderMarkets(){
   document.getElementById("mrows").innerHTML=MKT.map(mk=>{
     const u=mk.ts>0?mk.tb/mk.ts*100:0;
     return`<div class="mr">
-      <div class="ac">
-        <div class="ai" style="background:${mk.bg};color:${mk.color}">${mk.sym}</div>
-        <div><div class="as">${mk.sym}</div><div class="an">${mk.name}</div></div>
-      </div>
-      <div class="vt">$${mk.ts.toFixed(2)}</div>
-      <div class="vg">${mk.apy.toFixed(2)}%</div>
-      <div class="vt">$${mk.tb.toFixed(2)}</div>
-      <div class="vb">${mk.apr.toFixed(2)}%</div>
-      <div class="uw">
-        <div class="ubg"><div class="ufg" style="width:${Math.min(u,100)}%"></div></div>
-        <span style="font-family:'IBM Plex Mono',monospace;font-size:.76rem;color:var(--t2)">${u.toFixed(0)}%</span>
+      <div class="mr-top">
+        <div class="ac">
+          <div class="ai" style="background:${mk.bg};color:${mk.color}">${mk.sym}</div>
+          <div><div class="as">${mk.sym}</div><div class="an">${mk.name}</div></div>
+        </div>
+        <div class="mr-stats">
+          <span class="vg">${mk.apy.toFixed(2)}% APY</span>
+          <span class="vb">${mk.apr.toFixed(2)}% APR</span>
+          <span class="vt">${u.toFixed(0)}% util</span>
+        </div>
       </div>
       <div class="abtns">
         <button class="ab s" onclick="openModal('supply','${mk.sym}')">Supply</button>
